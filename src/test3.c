@@ -80,38 +80,6 @@ int addChar(char chr)
 	return 0;
 }
 
-int addChar2(char chr)
-{
-	int i;
-
-	if (command_size >= MAX_COMMAND_SIZE)
-		return BUFFER_FULL;
-
-	if (cursor_pos < command_size)
-	{
-		for (i=command_size; i>=cursor_pos; i--)
-			command[i+1] = command[i];
-
-		command[cursor_pos] = chr;
-		//sendChar(chr);
-		cursor_pos++;
-		command_size++;
-		sendString(&command[cursor_pos]);
-
-		for (i=command_size; i>cursor_pos; i--)
-			sendChar('\b');
-	}
-	else
-	{
-		cursor_pos++;
-		command_size++;
-		command[cursor_pos] = chr;
-		sendChar(chr);
-	}
-
-	return 0;
-}
-
 int handleLeft()
 {
 	if (cursor_pos <= 0)
@@ -119,6 +87,17 @@ int handleLeft()
 
 	cursor_pos--;
 	sendChar('\b');
+
+	return 0;
+}
+
+int handleRight()
+{
+	if (cursor_pos >= command_size)
+		return 0;
+
+	sendChar(command[cursor_pos]);
+	cursor_pos++;
 
 	return 0;
 }
@@ -137,7 +116,8 @@ void handleArrow(char arrow)
 		printf("down\n\r");
 		break;
 	case ARROW_RIGHT:
-		printf("right\n\r");
+		//printf("right\n\r");
+		handleRight();
 		break;
 	case ARROW_LEFT:
 		handleLeft();
