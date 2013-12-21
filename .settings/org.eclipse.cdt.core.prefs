@@ -1,0 +1,9 @@
+eclipse.preferences.version=1
+environment/project/cdt.managedbuild.config.gnu.cygwin.exe.debug.1349961358/CYGWIN_HOME/delimiter=;
+environment/project/cdt.managedbuild.config.gnu.cygwin.exe.debug.1349961358/CYGWIN_HOME/operation=replace
+environment/project/cdt.managedbuild.config.gnu.cygwin.exe.debug.1349961358/CYGWIN_HOME/value=C\:\\cygwin64
+environment/project/cdt.managedbuild.config.gnu.cygwin.exe.debug.1349961358/PATH/delimiter=;
+environment/project/cdt.managedbuild.config.gnu.cygwin.exe.debug.1349961358/PATH/operation=replace
+environment/project/cdt.managedbuild.config.gnu.cygwin.exe.debug.1349961358/PATH/value=${CYGWIN_HOME}\\bin;C\:\\Program Files (x86)\\NVIDIA Corporation\\PhysX\\Common;C\:\\Program Files\\Common Files\\Microsoft Shared\\Windows Live;C\:\\Program Files (x86)\\Common Files\\Microsoft Shared\\Windows Live;C\:\\cygwin64\\bin;C\:\\cygwin64\\usr\\local\\bin;C\:\\Program Files (x86)\\Bochs-2.5.1;C\:\\Program Files (x86)\\MiKTeX 2.8\\miktex\\bin;C\:\\Windows\\system32;C\:\\Windows;C\:\\Windows\\System32\\Wbem;C\:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;C\:\\Windows;C\:\\Windows\\system32;C\:\\Windows\\system32\\Wbem;C\:\\Program Files (x86)\\GtkSharp\\2.12\\bin;C\:\\Program Files (x86)\\QuickTime\\QTSystem\\;C\:\\Program Files (x86)\\Dynamips\\PIX\\asa\\qemu-0.9.0-windows;C\:\\Program Files (x86)\\Windows Live\\Shared;C\:\\Program Files (x86)\\GNU\\GnuPG\\pub;C\:\\Program Files\\TortoiseSVN\\bin;C\:\\Programs\\CooCox\\CoIDE\\gcc\\bin;C\:\\Program Files (x86)\\GNU Tools ARM Embedded\\4.7 2013q3\\bin
+environment/project/cdt.managedbuild.config.gnu.cygwin.exe.debug.1349961358/append=true
+environment/project/cdt.managedbuild.config.gnu.cygwin.exe.debug.1349961358/appendContributed=true
