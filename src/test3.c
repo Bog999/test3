@@ -6,7 +6,7 @@
 #include <ncurses/ncurses.h>
 #include <string.h>
 
-#define DEBUG 1
+#define DEBUG 0
 
 #define MAX_COMMAND_SIZE 63
 
@@ -62,8 +62,11 @@ int addChar(char chr)
 
 		command[cursor_pos] = chr;
 		sendString(&command[cursor_pos+1]);
+
 		cursor_pos++;
 		command_size++;
+		for (i=command_size; i>cursor_pos; i--)
+			sendChar('\b');
 	}
 	else
 	{
