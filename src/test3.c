@@ -234,8 +234,9 @@ int get_char()
 
 int main(int argc, char *argv[])
 {
-	char chr;
-	char escape;
+    char chr;
+    char escape;
+
     initscr();
     cbreak();
     noecho();
