@@ -35,16 +35,19 @@ void cli_init()
 	cursor_pos = 0;
 	command_size = 0;
 	command[0] = '\0';
+	command[MAX_COMMAND_SIZE] = '\0';
 }
 
 int sendChar(char ch)
 {
-	return printf("%c", ch);
+	printf("%c", ch);
+	return 0;
 }
 
 int sendString(char *str)
 {
-	return printf("%s", str);
+	printf("%s", str);
+	return 0;
 }
 
 int addChar(char chr)
@@ -170,12 +173,16 @@ int handleBackSpace()
 
 	if (cursor_pos < command_size)
 	{
-		for (i=cursor_pos; i<command_size; i++)
+		sendChar('\b');
+		for (i=cursor_pos-1; i<command_size-1; i++)
 		{
+			sendChar(command[i+1]);
 			command[i] = command[i+1];
-			sendChar(command[i]);
 		}
-		for (i=command_size-1; i>cursor_pos-1; i--)
+		command[i] = '\0';
+		sendChar(' ');
+
+		for (i=command_size; i>cursor_pos-1; i--)
 			sendChar('\b');
 	}
 	else
