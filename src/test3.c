@@ -20,22 +20,26 @@
 #define ARROW_LEFT 'D'
 
 char teststr[MAX_COMMAND_SIZE+1] = "abc\e[Dx";
-char command[MAX_COMMAND_SIZE+1];
-int cursor_pos;
-int command_size;
 
-void printStatus()
+typedef struct
 {
-	printf("\n\r%s\n\r", command);
-	printf("cur %d | siz %d\n\r", cursor_pos, command_size);
+	char command[MAX_COMMAND_SIZE+1];
+	int cursor_pos;
+	int command_size;
+}line_t;
+
+void printStatus(line_t *line)
+{
+	printf("\n\r%s\n\r", line->command);
+	printf("cur %d | siz %d\n\r", line->cursor_pos, line->command_size);
 }
 
-void cli_init()
+void line_init(line_t *line)
 {
-	cursor_pos = 0;
-	command_size = 0;
-	command[0] = '\0';
-	command[MAX_COMMAND_SIZE] = '\0';
+	line->cursor_pos = 0;
+	line->command_size = 0;
+	strcpy(line->command, "");
+	line->command[MAX_COMMAND_SIZE] = '\0';
 }
 
 int sendChar(char ch)
@@ -50,87 +54,87 @@ int sendString(char *str)
 	return 0;
 }
 
-int addChar(char chr)
+int addChar(line_t *line, char chr)
 {
 	int i;
 
-	if (command_size >= MAX_COMMAND_SIZE)
+	if (line->command_size >= MAX_COMMAND_SIZE)
 		return BUFFER_FULL;
 
-	if (cursor_pos < command_size)
+	if (line->cursor_pos < line->command_size)
 	{
 		sendChar(chr);
-		for (i=command_size; i>=cursor_pos; i--)
-			command[i+1] = command[i];
+		for (i=line->command_size; i>=line->cursor_pos; i--)
+			line->command[i+1] = line->command[i];
 
-		command[cursor_pos] = chr;
-		sendString(&command[cursor_pos+1]);
+		line->command[line->cursor_pos] = chr;
+		sendString(&(line->command[line->cursor_pos+1]));
 
-		cursor_pos++;
-		command_size++;
-		for (i=command_size; i>cursor_pos; i--)
+		line->cursor_pos++;
+		line->command_size++;
+		for (i=line->command_size; i>line->cursor_pos; i--)
 			sendChar('\b');
 	}
 	else
 	{
-		command[cursor_pos] = chr;
+		line->command[line->cursor_pos] = chr;
 		sendChar(chr);
-		cursor_pos++;
-		command_size++;
-		command[cursor_pos] = '\0';
+		line->cursor_pos++;
+		line->command_size++;
+		line->command[line->cursor_pos] = '\0';
 	}
 
 	return 0;
 }
 
-int handleLeft()
+int handleLeft(line_t *line)
 {
-	if (cursor_pos <= 0)
+	if (line->cursor_pos <= 0)
 		return 0;
 
-	cursor_pos--;
+	line->cursor_pos--;
 	sendChar('\b');
 
 	return 0;
 }
 
-int handleRight()
+int handleRight(line_t *line)
 {
-	if (cursor_pos >= command_size)
+	if (line->cursor_pos >= line->command_size)
 		return 0;
 
-	sendChar(command[cursor_pos]);
-	cursor_pos++;
+	sendChar(line->command[line->cursor_pos]);
+	line->cursor_pos++;
 
 	return 0;
 }
 
-void handleArrow(char arrow)
+void handleArrow(line_t *line, char arrow)
 {
-	arrow = toupper(arrow);
+	arrow = toupper((int)arrow);
 
 	switch(arrow)
 	{
 	case ARROW_UP:
 		//printf("up\n\r");
-		printStatus();
+		printStatus(line);
 		break;
 	case ARROW_DOWN:
 		printf("down\n\r");
 		break;
 	case ARROW_RIGHT:
 		//printf("right\n\r");
-		handleRight();
+		handleRight(line);
 		break;
 	case ARROW_LEFT:
-		handleLeft();
+		handleLeft(line);
 		break;
 	default:
 		break;
 	}
 }
 
-char checkEscape(char escape, char chr)
+char checkEscape(line_t *line, char escape, char chr)
 {
 	if (escape == 0)
 	{
@@ -147,66 +151,67 @@ char checkEscape(char escape, char chr)
 
 	if (escape == '[')
 	{
-		handleArrow(chr);
+		handleArrow(line, chr);
 		escape = 0;
 	}
 
 	return 0;
 }
 
-int handleCommand()
+int handleCommand(line_t *line)
 {
 	sendString("\n\r");
-	cursor_pos = 0;
-	command_size = 0;
-	command[0] = '\0';
+	sendString("got: ");
+	sendString(line->command);
+	sendString("\n\r");
+	line_init(line);
 
 	return 0;
 }
 
-int handleBackSpace()
+int handleBackSpace(line_t *line)
 {
 	int i;
 
-	if (cursor_pos <= 0)
+	if (line->cursor_pos <= 0)
 		return 0;
 
-	if (cursor_pos < command_size)
+	if (line->cursor_pos < line->command_size)
 	{
 		sendChar('\b');
-		for (i=cursor_pos-1; i<command_size-1; i++)
+		for (i=line->cursor_pos-1; i<line->command_size-1; i++)
 		{
-			sendChar(command[i+1]);
-			command[i] = command[i+1];
+			sendChar(line->command[i+1]);
+			line->command[i] = line->command[i+1];
 		}
-		command[i] = '\0';
+		line->command[i] = '\0';
 		sendChar(' ');
 
-		for (i=command_size; i>cursor_pos-1; i--)
+		for (i=line->command_size; i>line->cursor_pos-1; i--)
 			sendChar('\b');
 	}
 	else
 	{
-		command[cursor_pos-1] = '\0';
+		line->command[line->cursor_pos-1] = '\0';
 		sendString("\b \b");
 	}
 
-	cursor_pos--;
-	command_size--;
+	line->cursor_pos--;
+	line->command_size--;
 
 	return 0;
 }
 
-int handleSpecial(char chr)
+int handleSpecial(line_t *line, char chr)
 {
 	switch(chr)
 	{
 	case '\r': /* carriage return */
-		handleCommand();
+		handleCommand(line);
 		break;
 	case '\b': /* backspace or ctrl+h */
 	case 127:
-		handleBackSpace();
+		handleBackSpace(line);
 		break;
 	default:
 		break;
@@ -232,19 +237,51 @@ int get_char()
 	return getc(stdin);
 }
 
+void mainLoop(line_t *line)
+{
+	char chr;
+	char escape;
+
+	for (;;)
+	{
+		chr = get_char();
+
+		if (DEBUG && chr == '\0')
+			break;
+
+		if (chr < 0)
+			continue;
+
+		if (escape != 0 || chr == ESC_CODE)
+		{
+			escape = checkEscape(line, escape, chr);
+			continue;
+		}
+
+		if (chr < 27 || chr == 127)
+		{
+			handleSpecial(line, chr);
+		}
+		else
+		{
+			addChar(line, chr);
+		}
+	}
+
+	escape = 0;
+	line_init(line);
+}
+
 int main(int argc, char *argv[])
 {
-    char chr;
-    char escape;
+	line_t line;
 
     initscr();
     cbreak();
     noecho();
 
-    cli_init();
-
-    escape = 0;
-    for (;;)
+    mainLoop(&line);
+    /*for (;;)
 	{
     	chr = get_char();
 
@@ -260,7 +297,7 @@ int main(int argc, char *argv[])
    			continue;
     	}
 
-		if (chr < 25 || chr == 127)
+		if (chr < 27 || chr == 127)
 		{
 			handleSpecial(chr);
 		}
@@ -268,7 +305,7 @@ int main(int argc, char *argv[])
 		{
 			addChar(chr);
 		}
-	}
+	}*/
     endwin();
     return(0);
 }
